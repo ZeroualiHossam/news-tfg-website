@@ -1,0 +1,46 @@
+/* Contenedor principal en Home: columnas tipo periódico */
+.home-grid {
+    columns: 3;
+    column-gap: 2rem;
+    column-rule: 1px solid #ccc;
+    padding: 1rem;
+}
+
+  /* Tarjeta de grupo en Home */
+.home-card {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    break-inside: avoid-column;
+    background: #fff;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+  /* Miniatura dentro de la tarjeta */
+.home-card__thumb {
+    width: 100%;
+    height: auto;
+    margin-bottom: 0.5rem;
+}
+
+  /* Título de la tarjeta */
+.home-card__title {
+    font-size: 1.15rem;
+    margin: 0.3rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #222;
+}
+
+  /* Placeholder cuando no hay imagen */
+.home-card__placeholder {
+    width: 100%;
+    height: 150px;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: italic;
+    color: #999;
+}

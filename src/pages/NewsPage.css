@@ -1,0 +1,31 @@
+
+.news-detail {
+    padding: 2rem;
+    font-family: "Times New Roman", Times, serif;
+    line-height: 1.6;
+}
+
+/* Título principal */
+.news-detail__title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Párrafo de resumen completo */
+.news-detail__summary {
+    margin-bottom: 2rem;
+}
+
+/* Carrusel de imágenes */
+.news-detail__carousel {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Cada imagen del carrusel */
+.news-detail__image {
+    flex: 1;
+    max-width: calc((100% - 2rem) / 3);
+    height: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}

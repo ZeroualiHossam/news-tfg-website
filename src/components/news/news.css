@@ -1,0 +1,21 @@
+.galeria {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.galeria__item {
+    width: 200px;
+    text-align: center;
+}
+
+.galeria__imagen {
+    max-width: 100%;
+    height: auto;
+}
+
+.galeria__nombre {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #333;
+}
