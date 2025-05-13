@@ -34,6 +34,8 @@ export default function HomePage() {
     }
         load();
     }, []);
+    
+    console.log(groups);
 
     if (loading) return <p>Cargando grupos…</p>;
     if (error)   return <p>Error: {error.message}</p>;

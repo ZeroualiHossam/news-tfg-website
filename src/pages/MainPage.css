@@ -1,0 +1,161 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  color: #333;
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px 50px;
+  background-color: #111;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header .logo {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.nav-links li {
+  margin: 0 20px;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+/* Main Content Styles */
+.main-content {
+  padding: 50px;
+}
+
+/* Cuadrícula de noticias */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.news-item {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.news-item.large {
+  grid-column: span 2; /* Esto hace que algunas noticias ocupen más espacio */
+}
+
+.news-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.news-text {
+  padding: 20px;
+}
+
+.news-text h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.news-text p {
+  font-size: 14px;
+  color: #555;
+}
+
+.cta-btn {
+  padding: 10px 20px;
+  background-color: #007BFF;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+  display: inline-block;
+}
+
+.cta-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Noticias adicionales */
+.more-news {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.more-news-item {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.more-news-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.more-news-text {
+  padding: 20px;
+}
+
+.more-news-text h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.more-news-text p {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Popular Articles Section */
+.popular-articles {
+  padding: 30px;
+  background-color: #fff;
+  margin-top: 50px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.popular-articles h3 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.popular-articles ul {
+  list-style: none;
+}
+
+.popular-articles ul li {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
