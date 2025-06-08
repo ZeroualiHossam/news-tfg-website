@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import './MainPage.css';
-import newsData from '../assets/news_groups.json';
+// src/components/MainPage.jsx
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { getImagenes, getResumenes } from '../api/apiFunctions';
+import './MainPage.css';
 
 const layoutMap = [
   { col: '1', row: '1' },
@@ -13,18 +14,74 @@ const layoutMap = [
 
 const MainPage = () => {
   const [news, setNews] = useState([]);
-  useEffect(() => setNews(newsData), []);
+  const [imagesMap, setImagesMap] = useState({});
+  const [loading, setLoading] = useState(true);
+  const sliderRef = useRef(null);
 
-  const getImageByGroupId = id => {
-    const idx = Math.floor(Math.random() * 3) + 1;
-    return `/assets/images/group_${id}_image_${idx}.jpg`;
+  useEffect(() => {
+    async function loadNews() {
+      try {
+        const [resumenes, imagenes] = await Promise.all([
+          getResumenes(),
+          getImagenes()
+        ]);
+
+        const imageMap = {};
+        imagenes.forEach(img => {
+          const match = img.key.match(/group_(\d+)_/);
+          if (match) {
+            const groupId = match[1];
+            imageMap[groupId] = imageMap[groupId] || [];
+            imageMap[groupId].push(img);
+          }
+        });
+
+        setNews(resumenes);
+        setImagesMap(imageMap);
+      } catch (error) {
+        console.error('Error loading news:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadNews();
+  }, []);
+
+  const scrollBy = (distance) => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollBy({ left: distance, behavior: 'smooth' });
+    }
   };
+
+  const parseTitleFromSummary = (longSummary) => {
+    const titleMatch = longSummary.match(/^Título:\s*(.+?)(?:\n|$)/i);
+    if (titleMatch) return titleMatch[1].trim();
+    const titleMatchAngle = longSummary.match(/^<Título>:\s*(.+?)(?:\n|$)/i);
+    if (titleMatchAngle) return titleMatchAngle[1].trim();
+    const titleMatchAster = longSummary.match(/\*\*Título:\*\*\s*(.+?)(?:\n|$)/i);
+    if (titleMatchAster) return titleMatchAster[1].trim();
+    return longSummary.substring(0, 100) + '...';
+  };
+
+  const parseLeadFromSummary = (longSummary) => {
+    const leadMatch = longSummary.match(/\*\*Entradilla:\*\*\s*(.+?)(?:\n\n|\*\*)/s);
+    return leadMatch ? leadMatch[1].trim().substring(0, 150) + '...' : '';
+  };
+
+  const getImageByGroupId = (id) => {
+    const groupImages = imagesMap[String(id)];
+    if (groupImages && groupImages.length > 0) {
+      return groupImages[0].url;
+    }
+    return `/assets/images/placeholder.jpg`;
+  };
+
+  if (loading) return <div className="loading">Cargando noticias...</div>;
 
   return (
     <>
       <h1 className="grid-title">Latest News</h1>
 
-      {/* GRID PRINCIPAL FIJO */}
       <div className="grid-container">
         {news.slice(0, 5).map((item, i) => (
           <Link
@@ -33,34 +90,49 @@ const MainPage = () => {
             className="grid-item"
             style={{
               gridColumn: layoutMap[i].col,
-              gridRow:    layoutMap[i].row,
+              gridRow: layoutMap[i].row,
               backgroundImage: `url(${getImageByGroupId(item.group_id)})`
             }}
           >
             <div className="overlay">
-              <h2>{item.title}</h2>
-              <p>{item.long_summary.slice(0, 80)}…</p>
+              <h2>{parseTitleFromSummary(item.long_summary)}</h2>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* SLIDER HORIZONTAL CON MÁS NOTICIAS */}
       <h2 className="slider-title">More News</h2>
       <div className="slider-container">
-        <div className="more-news-row">
+        <button
+          className="slider-button left"
+          onClick={() => scrollBy(-600)}
+          aria-label="Scroll left"
+        >
+          &lt;
+        </button>
+        <div className="more-news-row" ref={sliderRef}>
           {news.slice(5).map(item => (
             <Link
               key={item.group_id}
               to={`/grupo/${item.group_id}`}
               className="more-news-item"
             >
-              <img src={getImageByGroupId(item.group_id)} alt="" />
-              <h4>{item.title}</h4>
-              <p className="lead">{item.lead}</p>
+              <img
+                src={getImageByGroupId(item.group_id)}
+                alt={parseTitleFromSummary(item.long_summary)}
+                onError={(e) => { e.target.src = '/assets/images/placeholder.jpg'; }}
+              />
+              <h4>{parseTitleFromSummary(item.long_summary)}</h4>
             </Link>
           ))}
         </div>
+        <button
+          className="slider-button right"
+          onClick={() => scrollBy(600)}
+          aria-label="Scroll right"
+        >
+          &gt;
+        </button>
       </div>
     </>
   );

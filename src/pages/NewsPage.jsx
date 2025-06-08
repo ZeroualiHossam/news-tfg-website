@@ -1,52 +1,119 @@
 import React from 'react';
+import { Navigate, useParams } from 'react-router-dom';
+import { getResumenes, getImagenes, getVideos } from '../api/apiFunctions';
 import './NewsPage.css';
-import { useParams, Navigate } from 'react-router-dom';
-import newsData from '../assets/news_groups.json';
 
 const NewsPage = () => {
   const { group_id } = useParams();
-  // Búsqueda síncrona y directa
-  const item = newsData.find(n => String(n.group_id) === group_id);
-  if (!item) return <Navigate to="/" replace />;
+  const [newsItem, setNewsItem] = React.useState(null);
+  const [images, setImages] = React.useState([]);
+  const [video, setVideo] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
 
-  // Dividir el resumen largo en párrafos
-  const paragraphs = item.long_summary.split('\n\n');
-  const middleIndex = Math.floor(paragraphs.length / 2);
+  React.useEffect(() => {
+    async function loadNews() {
+      try {
+        const [resumenes, imagenesData, videosData] = await Promise.all([
+          getResumenes(),
+          getImagenes(),
+          getVideos()
+        ]);
+        
+        const item = resumenes.find(n => String(n.group_id) === group_id);
+        setNewsItem(item);
+        
+        // Filtrar imágenes para este grupo
+        const groupImages = imagenesData.filter(img => 
+          img.key.includes(`group_${group_id}_`)
+        );
+        setImages(groupImages);
+        
+        // Filtrar video para este grupo
+        const groupVideo = videosData.find(vid => 
+          vid.key.includes(`group_${group_id}`)
+        );
+        setVideo(groupVideo);
+        
+      } catch (error) {
+        console.error('Error loading news:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadNews();
+  }, [group_id]);
 
-  // Primer bloque de texto antes de las imágenes
-  const firstPart = paragraphs.slice(0, middleIndex);
-  // Segundo bloque de texto después de las imágenes
-  const secondPart = paragraphs.slice(middleIndex);
+  if (loading) return <div className="news-page"><p>Cargando...</p></div>;
+  if (!newsItem) return <Navigate to="/" replace />;
 
-  const images = [1, 2, 3].map(i => `/assets/images/group_${item.group_id}_image_${i}.jpg`);
+  // Parsear el long_summary con la nueva estructura
+  const parseLongSummary = (longSummary) => {
+    const sections = longSummary.split('\n\n');
+    let titulo = '';
+    let entradilla = '';
+    let cuerpo = [];
+
+    sections.forEach(section => {
+      if (section.startsWith('**Título:**')) {
+        titulo = section.replace('**Título:**', '').trim();
+      } else if (section.startsWith('**Entradilla:**')) {
+        entradilla = section.replace('**Entradilla:**', '').trim();
+      } else if (section.startsWith('**Cuerpo:**')) {
+        const cuerpoText = section.replace('**Cuerpo:**', '').trim();
+        cuerpo = cuerpoText.split('\n\n').filter(p => p.trim());
+      } else if (!section.startsWith('**') && section.trim()) {
+        cuerpo.push(section.trim());
+      }
+    });
+
+    return { titulo, entradilla, cuerpo };
+  };
+
+  const { titulo, entradilla, cuerpo } = parseLongSummary(newsItem.long_summary);
+
+  // Dividir el cuerpo en dos partes para las imágenes
+  const middleIndex = Math.floor(cuerpo.length / 2);
+  const firstPart = cuerpo.slice(0, middleIndex);
+  const secondPart = cuerpo.slice(middleIndex);
 
   return (
     <div className="news-page">
-      <h1 className="news-title">{item.title}</h1>
-      <p className="news-lead">{item.lead}</p>
+      <h1 className="news-title">{titulo || newsItem.title}</h1>
+      <p className="news-lead">{entradilla || newsItem.lead}</p>
 
       {/* Mostrar el primer bloque de texto */}
       <div className="news-content">
         {firstPart.map((p, idx) => <p key={idx}>{p}</p>)}
       </div>
 
-      {/* Mostrar las imágenes en el medio */}
-      <div className="news-images">
-        {images.map(src => (
-          <img key={src} src={src} alt={item.title} />
-        ))}
-      </div>
+      {/* Mostrar las imágenes reales del API */}
+      {images.length > 0 && (
+        <div className="news-images">
+          {images.slice(0, 3).map(img => (
+            <img 
+              key={img.key} 
+              src={img.url} 
+              alt={titulo || newsItem.title} 
+              onError={(e) => {
+                console.error('Error loading image:', img.url);
+                e.target.style.display = 'none';
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Mostrar el segundo bloque de texto */}
       <div className="news-content">
         {secondPart.map((p, idx) => <p key={idx}>{p}</p>)}
       </div>
 
-      {/* Si hay video, mostrarlo al final */}
-      {item.video_url && (
+      {/* Mostrar video real del API */}
+      {video && (
         <div className="news-video-container">
           <video controls className="news-video">
-            <source src={item.video_url} type="video/mp4" />
+            <source src={video.url} type="video/mp4" />
+            Tu navegador no soporta el elemento video.
           </video>
         </div>
       )}
