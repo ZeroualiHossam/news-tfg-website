@@ -1,98 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import './MainPage.css';
-import newsData from '../assets/news_groups.json'; // Importando el archivo JSON directamente
+import newsData from '../assets/news_groups.json';
+import { Link } from 'react-router-dom';
+
+const layoutMap = [
+  { col: '1', row: '1' },
+  { col: '2', row: '1' },
+  { col: '3', row: '1' },
+  { col: '1', row: '2' },
+  { col: '2 / span 2', row: '2' }
+];
 
 const MainPage = () => {
   const [news, setNews] = useState([]);
+  useEffect(() => setNews(newsData), []);
 
-  useEffect(() => {
-    // Establecer las noticias directamente desde el JSON
-    setNews(newsData);
-    console.log('News Data Loaded:', newsData); // Verificar que los datos se están cargando
-  }, []);
-
-// Obtener una imagen correspondiente a un group_id
-    const getImageByGroupId = (groupId) => {
-    const imageCount = 3; // Ajusta según cuántas imágenes tienes por grupo
-    const randomImageIndex = Math.floor(Math.random() * imageCount) + 1;
-    const imagePath = `/assets/images/group_${groupId}_image_${randomImageIndex}.jpg`;
-
-    console.log(`Image path: ${imagePath}`); // Verificar la ruta de la imagen generada
-    return imagePath;
-    };
-
+  const getImageByGroupId = id => {
+    const idx = Math.floor(Math.random() * 3) + 1;
+    return `/assets/images/group_${id}_image_${idx}.jpg`;
+  };
 
   return (
-    <div className="main-container">
-      {/* Header Section */}
-      <header className="header">
-        <div className="logo">TNW</div>
-        <nav>
-          <ul className="nav-links">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">News</a></li>
-            <li><a href="#">Events</a></li>
-            <li><a href="#">Programs</a></li>
-            <li><a href="#">Spaces</a></li>
-            <li><a href="#">Partner With Us</a></li>
-          </ul>
-        </nav>
-      </header>
+    <>
+      <h1 className="grid-title">Latest News</h1>
 
-      {/* Main Content Section */}
-      <div className="main-content">
-        <div className="news-grid">
-          {/* Cuadrícula de noticias */}
-          {news.slice(0, 4).map((newsItem, index) => (
-            <div
-              key={newsItem.group_id}
-              className={`news-item ${index % 2 === 0 ? 'large' : ''}`}
+      {/* GRID PRINCIPAL FIJO */}
+      <div className="grid-container">
+        {news.slice(0, 5).map((item, i) => (
+          <Link
+            key={item.group_id}
+            to={`/grupo/${item.group_id}`}
+            className="grid-item"
+            style={{
+              gridColumn: layoutMap[i].col,
+              gridRow:    layoutMap[i].row,
+              backgroundImage: `url(${getImageByGroupId(item.group_id)})`
+            }}
+          >
+            <div className="overlay">
+              <h2>{item.title}</h2>
+              <p>{item.long_summary.slice(0, 80)}…</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* SLIDER HORIZONTAL CON MÁS NOTICIAS */}
+      <h2 className="slider-title">More News</h2>
+      <div className="slider-container">
+        <div className="more-news-row">
+          {news.slice(5).map(item => (
+            <Link
+              key={item.group_id}
+              to={`/grupo/${item.group_id}`}
+              className="more-news-item"
             >
-              <img
-                src={getImageByGroupId(newsItem.group_id)}
-                alt="News"
-                className="news-image"
-              />
-              <div className="news-text">
-                <h2>{newsItem.short_summary}</h2>
-                <p>{newsItem.long_summary.slice(0, 100)}...</p>
-                <button className="cta-btn">Read More</button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="more-news">
-          {/* Noticias adicionales */}
-          {news.slice(4).map((newsItem) => (
-            <div key={newsItem.group_id} className="more-news-item">
-              <img
-                src={getImageByGroupId(newsItem.group_id)}
-                alt="News"
-                className="news-image"
-              />
-              <div className="more-news-text">
-                <h2>{newsItem.short_summary}</h2>
-                <p>{newsItem.long_summary.slice(0, 100)}...</p>
-                <button className="cta-btn">Read More</button>
-              </div>
-            </div>
+              <img src={getImageByGroupId(item.group_id)} alt="" />
+              <h4>{item.title}</h4>
+              <p className="lead">{item.lead}</p>
+            </Link>
           ))}
         </div>
       </div>
-
-      {/* Popular Articles Section */}
-      <div className="popular-articles">
-        <h3>Popular Articles Today</h3>
-        <ul>
-          <li>Scientists created a biological quantum circuit in risky experiment</li>
-          <li>I secured a $100K pre-seed investment in 30 min</li>
-          <li>Leak: Samsung's S22 Ultra is the new Galaxy Note</li>
-          <li>Many startup accelerators fail. Here's how to find the right one</li>
-          <li>Scientists want to call Pluto a planet again</li>
-        </ul>
-      </div>
-    </div>
+    </>
   );
 };
 
