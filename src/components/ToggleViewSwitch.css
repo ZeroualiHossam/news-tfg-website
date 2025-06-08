@@ -1,0 +1,36 @@
+/* src/components/ToggleViewSwitch.css */
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .toggle-switch .icon {
+    width: 24px; height: 24px;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+  .toggle-switch .icon.active {
+    opacity: 1;
+  }
+  .toggle-switch .slider {
+    position: relative;
+    width: 50px; height: 24px;
+    background: #ccc;
+    border-radius: 12px;
+    margin: 0 8px;
+    transition: background 0.2s;
+  }
+  .toggle-switch .slider.image { background: #ddd; }
+  .toggle-switch .slider.video { background: #bbb; }
+  .toggle-switch .thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle-switch .slider.video .thumb {
+    transform: translateX(26px);
+  }
+  

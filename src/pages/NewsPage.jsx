@@ -1,58 +1,57 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getResumenes, getImagenes } from '../api/apiFunctions';
+import React from 'react';
+import './NewsPage.css';
+import { useParams, Navigate } from 'react-router-dom';
+import newsData from '../assets/news_groups.json';
 
-export default function NewsPage() {
-  const { groupId } = useParams();
-  const [resumen, setResumen]     = useState(null);
-  const [imgs, setImgs]           = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(null);
+const NewsPage = () => {
+  const { group_id } = useParams();
+  // Búsqueda síncrona y directa
+  const item = newsData.find(n => String(n.group_id) === group_id);
+  if (!item) return <Navigate to="/" replace />;
 
-  useEffect(() => {
-    async function loadDetail() {
-      try {
-        const [resumenes, imagenes] = await Promise.all([
-          getResumenes(),
-          getImagenes()
-        ]);
-        const grupo = resumenes.find(r => String(r.group_id) === groupId);
-        const urls = imagenes
-          .filter(({ key }) => key.match(new RegExp(`group_${groupId}_[1-3]\\.png$`)))
-          .map(i => i.url);
-        setResumen(grupo);
-        setImgs(urls);
-      } catch (e) {
-        setError(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadDetail();
-  }, [groupId]);
+  // Dividir el resumen largo en párrafos
+  const paragraphs = item.long_summary.split('\n\n');
+  const middleIndex = Math.floor(paragraphs.length / 2);
 
-  if (loading)  return <p>Cargando detalles…</p>;
-  if (error)    return <p>Error: {error.message}</p>;
-  if (!resumen) return <p>Grupo no encontrado</p>;
+  // Primer bloque de texto antes de las imágenes
+  const firstPart = paragraphs.slice(0, middleIndex);
+  // Segundo bloque de texto después de las imágenes
+  const secondPart = paragraphs.slice(middleIndex);
+
+  const images = [1, 2, 3].map(i => `/assets/images/group_${item.group_id}_image_${i}.jpg`);
 
   return (
-    <div className="news-detail">
-      <h1 className="news-detail__title">
-        {resumen.summary.split('.')[0]}
-      </h1>
-      <p className="news-detail__summary">
-        {resumen.summary}
-      </p>
-      <div className="news-detail__carousel">
-        {imgs.map(url => (
-          <img
-            key={url}
-            src={url}
-            alt=""
-            className="news-detail__image"
-          />
+    <div className="news-page">
+      <h1 className="news-title">{item.title}</h1>
+      <p className="news-lead">{item.lead}</p>
+
+      {/* Mostrar el primer bloque de texto */}
+      <div className="news-content">
+        {firstPart.map((p, idx) => <p key={idx}>{p}</p>)}
+      </div>
+
+      {/* Mostrar las imágenes en el medio */}
+      <div className="news-images">
+        {images.map(src => (
+          <img key={src} src={src} alt={item.title} />
         ))}
       </div>
+
+      {/* Mostrar el segundo bloque de texto */}
+      <div className="news-content">
+        {secondPart.map((p, idx) => <p key={idx}>{p}</p>)}
+      </div>
+
+      {/* Si hay video, mostrarlo al final */}
+      {item.video_url && (
+        <div className="news-video-container">
+          <video controls className="news-video">
+            <source src={item.video_url} type="video/mp4" />
+          </video>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default NewsPage;
