@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:5000";
+const API_BASE_URL = "https://news-tfg-api.onrender.com";
 
 console.log('🔧 API_BASE_URL configurada:', API_BASE_URL);
 
