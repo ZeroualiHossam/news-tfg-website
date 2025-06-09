@@ -1,7 +1,7 @@
-// src/components/MainPage.jsx
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getImagenes, getResumenes } from '../api/apiFunctions';
+import { getImagenesPrincipales, getResumenes } from '../api/apiFunctions';
+import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
 import './MainPage.css';
 
 const layoutMap = [
@@ -21,18 +21,16 @@ const MainPage = () => {
   useEffect(() => {
     async function loadNews() {
       try {
-        const [resumenes, imagenes] = await Promise.all([
+        const [resumenes, imagenesPrincipales] = await Promise.all([
           getResumenes(),
-          getImagenes()
+          getImagenesPrincipales()
         ]);
 
         const imageMap = {};
-        imagenes.forEach(img => {
+        imagenesPrincipales.forEach(img => {
           const match = img.key.match(/group_(\d+)_/);
           if (match) {
-            const groupId = match[1];
-            imageMap[groupId] = imageMap[groupId] || [];
-            imageMap[groupId].push(img);
+            imageMap[match[1]] = img.url;
           }
         });
 
@@ -69,14 +67,10 @@ const MainPage = () => {
   };
 
   const getImageByGroupId = (id) => {
-    const groupImages = imagesMap[String(id)];
-    if (groupImages && groupImages.length > 0) {
-      return groupImages[0].url;
-    }
-    return `/assets/images/placeholder.jpg`;
+    return imagesMap[String(id)] || '/assets/images/placeholder.jpg';
   };
 
-  if (loading) return <div className="loading">Cargando noticias...</div>;
+  if (loading) return <LoadingSpinner message="Cargando noticias..." />;
 
   return (
     <>

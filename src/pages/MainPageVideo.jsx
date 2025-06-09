@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getResumenes, getVideos } from '../api/apiFunctions';
+import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
 import ToggleViewSwitch from '../components/ToggleViewSwitch';
 import './MainPageVideo.css';
 
@@ -19,7 +20,6 @@ const MainPageVideos = () => {
           getVideos()
         ]);
         
-        // Crear mapa de videos por group_id
         const videoMap = {};
         videos.forEach(video => {
           const match = video.key.match(/group_(\d+)/);
@@ -51,7 +51,6 @@ const MainPageVideos = () => {
   };
 
   const parseLeadFromSummary = (longSummary) => {
-    // Buscar entradilla con diferentes formatos
     const leadMatch = longSummary.match(/Entradilla:\s*(.+?)(?:\n\n|\n(?=[A-Z])|$)/s);
     if (leadMatch) return leadMatch[1].trim();
     
@@ -64,21 +63,14 @@ const MainPageVideos = () => {
     return '';
   };
 
-
-  if (loading) return <div className="loading">Cargando...</div>;
+  if (loading) return <LoadingSpinner message="Cargando videos..." />;
 
   const current = news[idx] || {};
   const currentVideo = videosMap[String(current.group_id)];
 
   return (
     <div className="video-section">
-      {/* HEADER NEGRO CON LOGO + SWITCH */}
-      <header className="header">
-        <div className="logo">NEWS TFG</div>
-        <ToggleViewSwitch />
-      </header>
 
-      {/* CONTENIDO: RESUMEN, VÍDEO, NAVEGACIÓN, DETALLE */}
       <div className="content">
         <div className="side left">
           <h2 className="video-summary">

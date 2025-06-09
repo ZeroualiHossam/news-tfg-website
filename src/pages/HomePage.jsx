@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getImagenes, getResumenes } from '../api/apiFunctions';
+import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
 import './HomePage.css';
 
 export default function HomePage() {
@@ -46,7 +47,7 @@ export default function HomePage() {
         return titleMatch ? titleMatch[1].trim() : longSummary.substring(0, 80) + '...';
     };
 
-    if (loading) return <p>Cargando grupos…</p>;
+    if (loading) return <LoadingSpinner message="Cargando grupos..." />;
     if (error) return <p>Error: {error.message}</p>;
 
     return (

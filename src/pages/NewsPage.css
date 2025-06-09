@@ -1,51 +1,195 @@
+/* Configuración de tipografías */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
 .news-page {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 24px;
-    font-family: Georgia, 'Times New Roman', serif;
-    color: #333;
-    line-height: 1.6;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 24px;
+  line-height: 1.7;
+  color: #2c3e50;
+}
+
+/* Título principal */
+.news-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: #1a202c;
+  text-align: left;
+  letter-spacing: -0.02em;
+}
+
+/* Entradilla */
+.news-lead {
+  font-family: 'Lora', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #4a5568;
+  margin-bottom: 2rem;
+  font-style: italic;
+  padding-left: 1rem;
+  border-left: 4px solid #3182ce;
+  background-color: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+/* Contenido principal */
+.news-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Párrafos del cuerpo */
+.news-paragraph {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin-bottom: 0;
+  text-align: justify;
+  color: #2d3748;
+  text-indent: 1.5em;
+}
+
+.news-paragraph:first-letter {
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+/* Contenedores de imágenes */
+.news-image-container {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.news-image {
+  width:700px;
+  max-width: auto;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-image:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Galería de imágenes antigua (por compatibilidad) */
+.news-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin: 2rem 0;
+}
+
+.news-images img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.news-images img:hover {
+  transform: scale(1.02);
+}
+
+/* Contenedor de video */
+.news-video-container {
+  margin-top: 3rem;
+  text-align: center;
+  padding: 2rem 0;
+  border-top: 2px solid #e2e8f0;
+}
+
+.news-video {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .news-page {
+    padding: 0 16px;
+    margin: 20px auto;
   }
-  
+
   .news-title {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-  
-  .news-lead {
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
-    font-style: italic;
-    text-align: center;
-  }
-  
-  .news-images {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 1.5rem;
-  }
-  
-  .news-images img {
-    flex: 1;
-    object-fit: cover;
-    height: 200px;
-    border-radius: 4px;
-  }
-  
-  .news-content p {
+    font-size: 2.2rem;
     margin-bottom: 1rem;
-    text-align: justify;
   }
-  
-  .news-video-container {
-    margin-top: 2rem;
-    text-align: center;
+
+  .news-lead {
+    font-size: 1.1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
   }
-  
-  .news-video {
-    width: 100%;
-    max-width: 800px;
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+  .news-paragraph {
+    font-size: 1rem;
+    text-indent: 1em;
   }
+
+  .news-image-container {
+    margin: 1.5rem 0;
+  }
+
+  .news-images {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .news-images img {
+    height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-title {
+    font-size: 1.8rem;
+  }
+
+  .news-lead {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+
+  .news-paragraph {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    text-align: left;
+    text-indent: 0;
+  }
+}
+
+/* Mejoras tipográficas adicionales */
+.news-content p {
+  margin-bottom: 1rem;
+}
+
+.news-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Separadores visuales */
+.news-content > *:not(:last-child) {
+  position: relative;
+}
+
+.news-paragraph + .news-image-container {
+  margin-top: 2.5rem;
+}
+
+.news-image-container + .news-paragraph {
+  margin-top: 2.5rem;
+}
