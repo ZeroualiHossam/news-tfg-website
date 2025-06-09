@@ -1,43 +1,102 @@
 // src/pages/MainPageVideo.js
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getResumenes, getVideos } from '../api/apiFunctions';
+import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
 import ToggleViewSwitch from '../components/ToggleViewSwitch';
 import './MainPageVideo.css';
-import newsData from '../assets/news_groups.json';
 
 const MainPageVideos = () => {
   const [news, setNews] = useState([]);
+  const [videosMap, setVideosMap] = useState({});
   const [idx, setIdx] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setNews(newsData);
+    async function loadNews() {
+      try {
+        const [resumenes, videos] = await Promise.all([
+          getResumenes(),
+          getVideos()
+        ]);
+        
+        const videoMap = {};
+        videos.forEach(video => {
+          const match = video.key.match(/group_(\d+)/);
+          if (match) {
+            const groupId = match[1];
+            videoMap[groupId] = video;
+          }
+        });
+        
+        setNews(resumenes);
+        setVideosMap(videoMap);
+      } catch (error) {
+        console.error('Error loading news:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadNews();
   }, []);
 
+  const parseTitleFromSummary = (longSummary) => {
+    const titleMatch = longSummary.match(/^Título:\s*(.+?)(?:\n|$)/i);
+    if (titleMatch) return titleMatch[1].trim();
+    const titleMatchAngle = longSummary.match(/^<Título>:\s*(.+?)(?:\n|$)/i);
+    if (titleMatchAngle) return titleMatchAngle[1].trim();
+    const titleMatchAster = longSummary.match(/\*\*Título:\*\*\s*(.+?)(?:\n|$)/i);
+    if (titleMatchAster) return titleMatchAster[1].trim();
+    return longSummary.substring(0, 100) + '...';
+  };
+
+  const parseLeadFromSummary = (longSummary) => {
+    const leadMatch = longSummary.match(/Entradilla:\s*(.+?)(?:\n\n|\n(?=[A-Z])|$)/s);
+    if (leadMatch) return leadMatch[1].trim();
+    
+    const leadMatchAngle = longSummary.match(/<Entradilla>:\s*(.+?)(?:\n\n|\n(?=[A-Z])|$)/s);
+    if (leadMatchAngle) return leadMatchAngle[1].trim();
+    
+    const leadMatchAster = longSummary.match(/\*\*Entradilla:\*\*\s*(.+?)(?:\n\n|\*\*|$)/s);
+    if (leadMatchAster) return leadMatchAster[1].trim();
+    
+    return '';
+  };
+
+  if (loading) return <LoadingSpinner message="Cargando videos..." />;
+
   const current = news[idx] || {};
-  const getVideoByGroupId = id => `/assets/videos/group_${id}.mp4`;
+  const currentVideo = videosMap[String(current.group_id)];
 
   return (
     <div className="video-section">
 
-      {/* HEADER NEGRO CON LOGO + SWITCH */}
-      <header className="header">
-        <div className="logo">NEWS TFG</div>
-        <ToggleViewSwitch />
-      </header>
-
-      {/* CONTENIDO: RESUMEN, VÍDEO, NAVEGACIÓN, DETALLE */}
       <div className="content">
         <div className="side left">
-          <h2 className="video-summary">{current.title}</h2>
+          <h2 className="video-summary">
+            {parseTitleFromSummary(current.long_summary || '')}
+          </h2>
+          <p className="video-lead">
+            {parseLeadFromSummary(current.long_summary || '')}
+          </p>
         </div>
 
         <div className="video-container">
-          <video
-            key={current.group_id}
-            controls
-            src={getVideoByGroupId(current.group_id)}
-            className="video-player"
-          />
+          {currentVideo ? (
+            <video
+              key={current.group_id}
+              controls
+              src={currentVideo.url}
+              className="video-player"
+            >
+              Tu navegador no soporta el elemento video.
+            </video>
+          ) : (
+            <div className="video-placeholder">
+              <p>Video no disponible para esta noticia</p>
+            </div>
+          )}
+          
           <div className="navigation-buttons">
             <button
               className="nav-btn"

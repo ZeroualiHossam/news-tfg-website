@@ -1,15 +1,14 @@
 // src/components/Layout.js
-import React from 'react';
-import ToggleViewSwitch from './ToggleViewSwitch';
+import { Link } from 'react-router-dom';
 import './Layout.css';
+import ToggleViewSwitch from './ToggleViewSwitch';
 
 export default function Layout({ children }) {
   return (
     <>
       <header className="header">
-        <div className="logo">NEWS TFG</div>
+        <Link to="/" className="logo">NEWS TFG</Link>
         <nav className="nav-with-toggle">
-          {/* Aquí podrías añadir más enlaces si los necesitas */}
           <ToggleViewSwitch />
         </nav>
       </header>
