@@ -73,7 +73,87 @@ const NewsPage = () => {
 
   const { titulo, entradilla, cuerpo } = parseLongSummary(newsItem.long_summary);
 
-  // Función para renderizar contenido con imágenes intercaladas
+  // NUEVA FUNCIÓN: Renderizar imágenes en grupos
+  const renderImageGroup = (imageIndexes, key) => {
+    const validImages = imageIndexes
+      .map(idx => images[idx])
+      .filter(img => img);
+
+    if (validImages.length === 0) return null;
+
+    if (validImages.length === 1) {
+      return (
+        <div key={key} className="news-image-container">
+          <img 
+            src={validImages[0].url} 
+            alt={titulo} 
+            className="news-image"
+            onError={(e) => {
+              console.error('Error loading image:', validImages[0].url);
+              e.target.style.display = 'none';
+            }}
+          />
+        </div>
+      );
+    }
+
+    if (validImages.length === 2) {
+      return (
+        <div key={key} className="news-images-dual">
+          {validImages.map((img, idx) => (
+            <img 
+              key={`dual-${idx}`}
+              src={img.url} 
+              alt={titulo} 
+              className="news-image"
+              onError={(e) => {
+                console.error('Error loading image:', img.url);
+                e.target.style.display = 'none';
+              }}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    if (validImages.length === 3) {
+      return (
+        <div key={key} className="news-images-triple">
+          {validImages.map((img, idx) => (
+            <img 
+              key={`triple-${idx}`}
+              src={img.url} 
+              alt={titulo} 
+              className="news-image"
+              onError={(e) => {
+                console.error('Error loading image:', img.url);
+                e.target.style.display = 'none';
+              }}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  // NUEVA FUNCIÓN: Renderizar bloques de texto
+  const renderTextBlock = (paragraphs, key) => {
+    if (paragraphs.length === 0) return null;
+
+    return (
+      <div key={key} className="news-text-block">
+        {paragraphs.map((paragraph, idx) => (
+          <p key={`text-${idx}`} className="news-paragraph">
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
+  // Función mejorada para renderizar contenido con imágenes intercaladas
   const renderContentWithImages = () => {
     const content = [];
     
@@ -87,49 +167,83 @@ const NewsPage = () => {
       <p key="lead" className="news-lead">{entradilla}</p>
     );
 
-    // Primera imagen después de la entradilla
-    if (images.length > 0) {
-      content.push(
-        <div key="image-0" className="news-image-container">
-          <img 
-            src={images[0].url} 
-            alt={titulo} 
-            className="news-image"
-            onError={(e) => {
-              console.error('Error loading image:', images[0].url);
-              e.target.style.display = 'none';
-            }}
-          />
-        </div>
-      );
+    // Si no hay párrafos, mostrar todas las imágenes
+    if (cuerpo.length === 0) {
+      if (images.length > 0) {
+        // Agrupar todas las imágenes disponibles de 2 en 2
+        for (let i = 0; i < images.length; i += 2) {
+          const imageIndexes = i + 1 < images.length ? [i, i + 1] : [i];
+          content.push(renderImageGroup(imageIndexes, `images-${i}`));
+        }
+      }
+      return content;
     }
 
-    // Intercalar párrafos con imágenes
-    cuerpo.forEach((paragraph, index) => {
-      content.push(
-        <p key={`paragraph-${index}`} className="news-paragraph">
-          {paragraph}
-        </p>
-      );
+    // Estrategia de distribución de contenido
+    const totalParagraphs = cuerpo.length;
+    const totalImages = images.length;
 
-      // Añadir imagen después de cada párrafo (empezando por la imagen 1)
-      const imageIndex = index + 1;
-      if (imageIndex < images.length && imageIndex < 5) {
-        content.push(
-          <div key={`image-${imageIndex}`} className="news-image-container">
-            <img 
-              src={images[imageIndex].url} 
-              alt={titulo} 
-              className="news-image"
-              onError={(e) => {
-                console.error('Error loading image:', images[imageIndex].url);
-                e.target.style.display = 'none';
-              }}
-            />
-          </div>
-        );
+    if (totalImages === 0) {
+      // Solo texto
+      content.push(renderTextBlock(cuerpo, 'all-text'));
+    } else if (totalImages === 1) {
+      // Una imagen después del primer párrafo
+      content.push(renderTextBlock([cuerpo[0]], 'text-1'));
+      content.push(renderImageGroup([0], 'image-1'));
+      if (cuerpo.length > 1) {
+        content.push(renderTextBlock(cuerpo.slice(1), 'text-remaining'));
       }
-    });
+    } else {
+      // NUEVA LÓGICA: Primera imagen individual, resto de 2 en 2
+      const paragraphsPerSection = Math.ceil(totalParagraphs / Math.min(3, totalImages));
+      
+      // Primera sección de texto
+      content.push(renderTextBlock(cuerpo.slice(0, paragraphsPerSection), 'text-1'));
+      
+      // Primera imagen (individual)
+      content.push(renderImageGroup([0], 'image-1'));
+      
+      // Segunda sección de texto (si hay más párrafos)
+      const start2 = paragraphsPerSection;
+      const end2 = Math.min(start2 + paragraphsPerSection, totalParagraphs);
+      if (start2 < totalParagraphs) {
+        content.push(renderTextBlock(cuerpo.slice(start2, end2), 'text-2'));
+      }
+      
+      // RESTO DE IMÁGENES DE 2 EN 2
+      let imageIndex = 1; // Empezamos desde la segunda imagen
+      let sectionIndex = 3;
+      
+      while (imageIndex < totalImages) {
+        // Determinar cuántas imágenes añadir en este grupo (máximo 2)
+        const imagesInThisGroup = Math.min(2, totalImages - imageIndex);
+        const imageIndexes = [];
+        
+        for (let i = 0; i < imagesInThisGroup; i++) {
+          imageIndexes.push(imageIndex + i);
+        }
+        
+        // Añadir el grupo de imágenes (siempre de 2 en 2 a partir de la segunda)
+        content.push(renderImageGroup(imageIndexes, `images-group-${sectionIndex}`));
+        
+        // Añadir más texto si queda y hay más imágenes por mostrar
+        const textStart = end2 + (sectionIndex - 3) * Math.ceil(paragraphsPerSection / 2);
+        const textEnd = Math.min(textStart + Math.ceil(paragraphsPerSection / 2), totalParagraphs);
+        
+        if (textStart < totalParagraphs && imageIndex + imagesInThisGroup < totalImages) {
+          content.push(renderTextBlock(cuerpo.slice(textStart, textEnd), `text-${sectionIndex}`));
+        }
+        
+        imageIndex += imagesInThisGroup;
+        sectionIndex++;
+      }
+      
+      // Añadir texto restante al final si queda
+      const finalTextStart = end2 + Math.floor((imageIndex - 1) / 2) * Math.ceil(paragraphsPerSection / 2);
+      if (finalTextStart < totalParagraphs) {
+        content.push(renderTextBlock(cuerpo.slice(finalTextStart), 'text-final'));
+      }
+    }
 
     return content;
   };

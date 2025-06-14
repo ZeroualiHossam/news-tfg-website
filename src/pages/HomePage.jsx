@@ -18,7 +18,6 @@ export default function HomePage() {
                     getImagenes()
                 ]);
                 
-                // Crear mapa de imágenes más eficiente
                 const map = {};
                 imagenes.forEach(({ key, url }) => {
                     const match = key.match(/group_(\d+)_/);
@@ -71,8 +70,8 @@ export default function HomePage() {
                                 }}
                             />
                         ) : null}
-                        <div 
-                            className="home-card__placeholder" 
+                        <div
+                            className="home-card__placeholder"
                             style={{ display: thumb ? 'none' : 'flex' }}
                         >
                             Sin imagen

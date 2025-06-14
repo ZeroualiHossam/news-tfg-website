@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getResumenes, getVideos } from '../api/apiFunctions';
 import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
-import ToggleViewSwitch from '../components/ToggleViewSwitch';
 import './MainPageVideo.css';
 
 const MainPageVideos = () => {
@@ -70,17 +69,26 @@ const MainPageVideos = () => {
 
   return (
     <div className="video-section">
-
       <div className="content">
-        <div className="side left">
+        {/* Título centrado */}
+        <div className="title-container">
           <h2 className="video-summary">
             {parseTitleFromSummary(current.long_summary || '')}
           </h2>
-          <p className="video-lead">
-            {parseLeadFromSummary(current.long_summary || '')}
-          </p>
         </div>
 
+        {/* Botón izquierdo */}
+        <div className="side left">
+          <button
+            className="nav-btn lateral"
+            onClick={() => setIdx(i => Math.max(i - 1, 0))}
+            disabled={idx === 0}
+          >
+            ← Previous
+          </button>
+        </div>
+
+        {/* Video en el centro */}
         <div className="video-container">
           {currentVideo ? (
             <video
@@ -97,28 +105,26 @@ const MainPageVideos = () => {
             </div>
           )}
           
-          <div className="navigation-buttons">
-            <button
-              className="nav-btn"
-              onClick={() => setIdx(i => Math.max(i - 1, 0))}
-              disabled={idx === 0}
-            >
-              ↑ Previous
-            </button>
-            <button
-              className="nav-btn"
-              onClick={() => setIdx(i => Math.min(i + 1, news.length - 1))}
-              disabled={idx === news.length - 1}
-            >
-              ↓ Next
-            </button>
-          </div>
-        </div>
-
-        <div className="side right">
+          {/* Entradilla debajo del video */}
+          <p className="video-lead">
+            {parseLeadFromSummary(current.long_summary || '')}
+          </p>
+          
+          {/* Botón de ver noticia completa */}
           <Link to={`/grupo/${current.group_id}`} className="detail-btn">
             Ver Noticia Completa
           </Link>
+        </div>
+
+        {/* Botón derecho */}
+        <div className="side right">
+          <button
+            className="nav-btn lateral"
+            onClick={() => setIdx(i => Math.min(i + 1, news.length - 1))}
+            disabled={idx === news.length - 1}
+          >
+            Next →
+          </button>
         </div>
       </div>
     </div>
