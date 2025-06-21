@@ -11,14 +11,7 @@ const MainPageVideos = () => {
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  // Touch/swipe states
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-  const [isScrolling, setIsScrolling] = useState(false);
   const videoSectionRef = useRef(null);
-
-  // Minimum swipe distance (in px)
-  const minSwipeDistance = 50;
 
   useEffect(() => {
     async function loadNews() {
@@ -47,38 +40,6 @@ const MainPageVideos = () => {
     }
     loadNews();
   }, []);
-
-  // Touch handlers for mobile swipe
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientY);
-  };
-
-  const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientY);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isUpSwipe = distance > minSwipeDistance;
-    const isDownSwipe = distance < -minSwipeDistance;
-
-    if (isUpSwipe && idx < news.length - 1) {
-      // Swipe up - next video
-      setIdx(prev => prev + 1);
-      setIsScrolling(true);
-      setTimeout(() => setIsScrolling(false), 300);
-    }
-    
-    if (isDownSwipe && idx > 0) {
-      // Swipe down - previous video
-      setIdx(prev => prev - 1);
-      setIsScrolling(true);
-      setTimeout(() => setIsScrolling(false), 300);
-    }
-  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -131,11 +92,8 @@ const MainPageVideos = () => {
 
   return (
     <div 
-      className={`video-section ${isScrolling ? 'scrolling' : ''}`}
+      className="video-section"
       ref={videoSectionRef}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
     >
       {/* Mobile Navigation - Top */}
       <div className="mobile-nav-top">
@@ -175,7 +133,6 @@ const MainPageVideos = () => {
               controls
               src={currentVideo.url}
               className="video-player"
-              onTouchStart={(e) => e.stopPropagation()}
             >
               Tu navegador no soporta el elemento video.
             </video>
