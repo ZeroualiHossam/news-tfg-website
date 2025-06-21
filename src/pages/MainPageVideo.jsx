@@ -1,9 +1,8 @@
 // src/pages/MainPageVideo.js
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getResumenes, getVideos } from '../api/apiFunctions';
 import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
-import ToggleViewSwitch from '../components/ToggleViewSwitch';
 import './MainPageVideo.css';
 
 const MainPageVideos = () => {
@@ -11,6 +10,15 @@ const MainPageVideos = () => {
   const [videosMap, setVideosMap] = useState({});
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(true);
+  
+  // Touch/swipe states
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const videoSectionRef = useRef(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   useEffect(() => {
     async function loadNews() {
@@ -39,6 +47,59 @@ const MainPageVideos = () => {
     }
     loadNews();
   }, []);
+
+  // Touch handlers for mobile swipe
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isUpSwipe = distance > minSwipeDistance;
+    const isDownSwipe = distance < -minSwipeDistance;
+
+    if (isUpSwipe && idx < news.length - 1) {
+      // Swipe up - next video
+      setIdx(prev => prev + 1);
+      setIsScrolling(true);
+      setTimeout(() => setIsScrolling(false), 300);
+    }
+    
+    if (isDownSwipe && idx > 0) {
+      // Swipe down - previous video
+      setIdx(prev => prev - 1);
+      setIsScrolling(true);
+      setTimeout(() => setIsScrolling(false), 300);
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'ArrowUp' && idx > 0) {
+        setIdx(prev => prev - 1);
+      }
+      if (e.key === 'ArrowDown' && idx < news.length - 1) {
+        setIdx(prev => prev + 1);
+      }
+      if (e.key === 'ArrowLeft' && idx > 0) {
+        setIdx(prev => prev - 1);
+      }
+      if (e.key === 'ArrowRight' && idx < news.length - 1) {
+        setIdx(prev => prev + 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [idx, news.length]);
 
   const parseTitleFromSummary = (longSummary) => {
     const titleMatch = longSummary.match(/^Título:\s*(.+?)(?:\n|$)/i);
@@ -69,18 +130,44 @@ const MainPageVideos = () => {
   const currentVideo = videosMap[String(current.group_id)];
 
   return (
-    <div className="video-section">
+    <div 
+      className={`video-section ${isScrolling ? 'scrolling' : ''}`}
+      ref={videoSectionRef}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Mobile Navigation - Top */}
+      <div className="mobile-nav-top">
+        <button
+          className="mobile-nav-btn"
+          onClick={() => setIdx(i => Math.max(i - 1, 0))}
+          disabled={idx === 0}
+        >
+          Anterior
+        </button>
+      </div>
+
+      {/* Desktop Navigation - Left */}
+      <div className="desktop-nav-left">
+        <button
+          className="desktop-nav-btn"
+          onClick={() => setIdx(i => Math.max(i - 1, 0))}
+          disabled={idx === 0}
+        >
+          Anterior
+        </button>
+      </div>
 
       <div className="content">
-        <div className="side left">
+        {/* Título */}
+        <div className="title-section">
           <h2 className="video-summary">
             {parseTitleFromSummary(current.long_summary || '')}
           </h2>
-          <p className="video-lead">
-            {parseLeadFromSummary(current.long_summary || '')}
-          </p>
         </div>
 
+        {/* Video */}
         <div className="video-container">
           {currentVideo ? (
             <video
@@ -88,6 +175,7 @@ const MainPageVideos = () => {
               controls
               src={currentVideo.url}
               className="video-player"
+              onTouchStart={(e) => e.stopPropagation()}
             >
               Tu navegador no soporta el elemento video.
             </video>
@@ -96,30 +184,43 @@ const MainPageVideos = () => {
               <p>Video no disponible para esta noticia</p>
             </div>
           )}
-          
-          <div className="navigation-buttons">
-            <button
-              className="nav-btn"
-              onClick={() => setIdx(i => Math.max(i - 1, 0))}
-              disabled={idx === 0}
-            >
-              ↑ Previous
-            </button>
-            <button
-              className="nav-btn"
-              onClick={() => setIdx(i => Math.min(i + 1, news.length - 1))}
-              disabled={idx === news.length - 1}
-            >
-              ↓ Next
-            </button>
-          </div>
         </div>
 
-        <div className="side right">
+        {/* Entradilla */}
+        <div className="lead-section">
+          <p className="video-lead">
+            {parseLeadFromSummary(current.long_summary || '')}
+          </p>
+        </div>
+
+        {/* Botón Ver Noticia Completa */}
+        <div className="detail-section">
           <Link to={`/grupo/${current.group_id}`} className="detail-btn">
             Ver Noticia Completa
           </Link>
         </div>
+      </div>
+
+      {/* Desktop Navigation - Right */}
+      <div className="desktop-nav-right">
+        <button
+          className="desktop-nav-btn"
+          onClick={() => setIdx(i => Math.min(i + 1, news.length - 1))}
+          disabled={idx === news.length - 1}
+        >
+          Siguiente
+        </button>
+      </div>
+
+      {/* Mobile Navigation - Bottom */}
+      <div className="mobile-nav-bottom">
+        <button
+          className="mobile-nav-btn"
+          onClick={() => setIdx(i => Math.min(i + 1, news.length - 1))}
+          disabled={idx === news.length - 1}
+        >
+          Siguiente
+        </button>
       </div>
     </div>
   );

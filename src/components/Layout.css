@@ -15,7 +15,7 @@
     align-items: center;
   }
   .main-container {
-    padding-top: 40px;
+    padding-top: 0px;
   }
   .logo {
     text-decoration: none;
@@ -33,3 +33,34 @@
   .logo:visited {
     color: inherit;
   }
+  
+  /* ==== RESPONSIVE DESIGN ==== */
+@media (max-width: 768px) {
+  .header {
+    height: 50px;
+    padding: 0 12px;
+  }
+  
+  .logo {
+    font-size: 1.4rem;
+  }
+  
+  .main-container {
+    padding-top: 0px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    height: 45px;
+    padding: 0 8px;
+  }
+  
+  .logo {
+    font-size: 1.2rem;
+  }
+  
+  .main-container {
+    padding-top: 0px;
+  }
+}

@@ -54,3 +54,54 @@
   padding-top: 12px;
   font-size: 0.8rem;
 }
+
+/* ==== RESPONSIVE MARGIN TOP ==== */
+@media (max-width: 1200px) {
+  .site-footer {
+    margin-top: 60px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .site-footer {
+    margin-top: 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-footer {
+    margin-top: 40px;
+  }
+  
+  .footer-content {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-footer {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-footer {
+    margin-top: 10px;
+    padding: 30px 16px 12px;
+  }
+  
+  .footer-content {
+    gap: 16px;
+  }
+  
+  .footer-section {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 320px) {
+  .site-footer {
+    margin-top: 5px;
+    padding: 24px 12px 8px;
+  }
+}
