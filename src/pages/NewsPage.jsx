@@ -19,29 +19,26 @@ const NewsPage = () => {
           getImagenes(),
           getVideos()
         ]);
-        
         const item = resumenes.find(n => String(n.group_id) === group_id);
         setNewsItem(item);
-        
-        // Filtrar imágenes para este grupo
-        const groupImages = imagenesData.filter(img => 
+        const groupImages = imagenesData.filter(img =>
           img.key.includes(`group_${group_id}_`)
         );
         setImages(groupImages);
-        
-        // Filtrar video para este grupo
-        const groupVideo = videosData.find(vid => 
+        const groupVideo = videosData.find(vid =>
           vid.key.includes(`group_${group_id}`)
         );
         setVideo(groupVideo);
-        
       } catch (error) {
         console.error('Error loading news:', error);
       } finally {
         setLoading(false);
       }
     }
+
     loadNews();
+    // Desplazar al tope de la página al abrir noticia
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }, [group_id]);
 
   if (loading) return <LoadingSpinner message="Cargando noticia..." />;

@@ -5,6 +5,7 @@
   text-align: center;
   font-weight: bold;
   margin-top: 1rem; /* Restaurado */
+  color: #282c34;
 }
 .slider-title {
   font-size: 1.5rem;
@@ -15,6 +16,7 @@
   margin-left: auto;
   margin-right: auto;
   padding: 0 1rem;
+  color: #282c34;
 }
 
 /* ==== GRID CONTAINER ==== */
@@ -200,7 +202,7 @@
   padding: 0.5rem 1rem;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #F97A00;
   max-width: 1600px; /* Añadido para consistencia */
 }
 
@@ -328,7 +330,7 @@
 }
 
 .clear-filters-btn {
-  background: #007bff;
+  background: #F97A00;
   color: white;
   border: none;
   padding: 0.8rem 2rem;

@@ -6,7 +6,7 @@
   --bg-header: #1f2937;
   --text-primary: #111827;
   --text-secondary: #4b5563;
-  --accent: #3b82f6;
+  --accent: #F97A00;
   --card-bg: #ffffff;
   --shadow-soft: rgba(0, 0, 0, 0.1);
   --radius: 12px;
@@ -19,7 +19,7 @@
 }
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--bg-page);
+  background: #ffffff;
   color: var(--text-primary);
   line-height: 1.6;
 }
@@ -181,7 +181,7 @@ body {
 
 .desktop-nav-btn {
   padding: 16px 24px;
-  background: linear-gradient(135deg, var(--accent), #2563eb);
+  background: #F97A00;
   border: none;
   color: #fff;
   font-size: 1rem;
@@ -194,7 +194,7 @@ body {
 }
 
 .desktop-nav-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: #F97A00;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
 }
@@ -229,7 +229,7 @@ body {
 
 .mobile-nav-btn {
   padding: 12px 24px;
-  background: linear-gradient(135deg, var(--accent), #2563eb);
+  background: #F97A00;
   border: none;
   color: #fff;
   font-size: 0.9rem;
@@ -241,7 +241,7 @@ body {
 }
 
 .mobile-nav-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: #F97A00;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }

@@ -8,6 +8,7 @@ export async function getNoticias() {
     console.log('🌐 URL completa:', url);
     try {
         const res = await fetch(url);
+        console.log('📊 Headers de la solicitud:', res);
         console.log('📊 Response status:', res.status);
         console.log('📊 Response headers:', [...res.headers.entries()]);
         if (!res.ok) {
@@ -52,20 +53,23 @@ export async function getResumenes() {
     try {
         const res = await fetch(url);
         console.log('📊 Response status:', res.status);
-        console.log('📊 Content-Type:', res.headers.get('content-type'));
         if (!res.ok) {
             const errorText = await res.text();
             console.error('❌ Error response:', errorText.substring(0, 200));
             throw new Error(`HTTP ${res.status}: ${errorText.substring(0, 100)}`);
         }
-        const contentType = res.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const responseText = await res.text();
-            console.error('❌ Respuesta no es JSON:', responseText.substring(0, 200));
-            throw new Error('La respuesta no es JSON válido');
+        // Leer siempre como texto para sanear NaN
+        const text = await res.text();
+        // Reemplazar tokens NaN inválidos por null
+        const safeText = text.replace(/:NaN(?=[,}])/g, ':null');
+        let data;
+        try {
+            data = JSON.parse(safeText);
+        } catch (parseError) {
+            console.error('❌ Error parseando JSON tras saneamiento:', parseError);
+            throw new Error('Error al parsear JSON de resumenes');
         }
-        const data = await res.json();
-        console.log('✅ Data recibida (primeros 2 items):', data?.slice(0, 2));
+        console.log('✅ Data recibida (primeros 2 items tras saneamiento):', data?.slice(0, 2));
         return data;
     } catch (error) {
         console.error('❌ Error en getResumenes:', error);

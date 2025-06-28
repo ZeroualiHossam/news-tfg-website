@@ -1,14 +1,14 @@
 :root {
   /* Colores principales estandarizados */
-  --primary-color: #3b82f6;
-  --primary-hover: #2563eb;
+  --primary-color: #F97A00;
+  --primary-hover: #d57215;
   --primary-light: rgba(59, 130, 246, 0.1);
   --primary-shadow: rgba(59, 130, 246, 0.25);
   
   /* Colores de borde */
   --border-color: #e2e8f0;
-  --border-focus: #3b82f6;
-  
+  --border-focus: #F97A00;
+
   /* Colores de texto */
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
