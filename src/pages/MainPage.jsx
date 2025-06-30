@@ -130,7 +130,6 @@ const MainPage = () => {
 
   return (
     <>
-      <h1 className="grid-title">Últimas notícias</h1>
       
       {/* Filters Component */}
       <NewsFilters

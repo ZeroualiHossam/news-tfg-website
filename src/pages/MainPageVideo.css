@@ -146,20 +146,18 @@ body {
   align-items: center;
   justify-content: center;
   padding: 18px 36px;
-  background: linear-gradient(135deg, #059669, #047857);
+  background: #F97A00;
   color: #fff;
   text-decoration: none;
   font-size: 1.1rem;
   font-weight: 600;
   border-radius: 50px;
   transition: all var(--transition);
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
 .detail-btn:hover {
-  background: linear-gradient(135deg, #047857, #065f46);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+  box-shadow: 0 4px 8px rgba(213, 114, 21, 0.8);
 }
 
 /* ==== NAVEGACIÓN DESKTOP ==== */
@@ -181,7 +179,7 @@ body {
 
 .desktop-nav-btn {
   padding: 16px 24px;
-  background: #F97A00;
+  background: #282c34;
   border: none;
   color: #fff;
   font-size: 1rem;
@@ -194,9 +192,8 @@ body {
 }
 
 .desktop-nav-btn:hover:not(:disabled) {
-  background: #F97A00;
+  background: #1a1d22;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
 }
 
 .desktop-nav-btn:disabled {
