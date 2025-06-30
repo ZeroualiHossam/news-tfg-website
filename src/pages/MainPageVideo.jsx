@@ -1,5 +1,5 @@
 // src/pages/MainPageVideo.js
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getResumenes, getVideos } from '../api/apiFunctions';
 import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
@@ -10,26 +10,43 @@ const MainPageVideos = () => {
   const [videosMap, setVideosMap] = useState({});
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(true);
-  
   const videoSectionRef = useRef(null);
+
+  // Función para intercalar: primero, último, segundo, penúltimo...
+  const interleave = (arr) => {
+    const result = [];
+    let left = 0;
+    let right = arr.length - 1;
+    while (left <= right) {
+      if (left === right) {
+        result.push(arr[left]);
+      } else {
+        result.push(arr[left]);
+        result.push(arr[right]);
+      }
+      left++;
+      right--;
+    }
+    return result;
+  };
+
+  // Orden intercalado de noticias
+  const orderedNews = useMemo(() => interleave(news), [news]);
 
   useEffect(() => {
     async function loadNews() {
       try {
         const [resumenes, videos] = await Promise.all([
           getResumenes(),
-          getVideos()
+          getVideos(),
         ]);
-        
+
         const videoMap = {};
         videos.forEach(video => {
           const match = video.key.match(/group_(\d+)/);
-          if (match) {
-            const groupId = match[1];
-            videoMap[groupId] = video;
-          }
+          if (match) videoMap[match[1]] = video;
         });
-        
+
         setNews(resumenes);
         setVideosMap(videoMap);
       } catch (error) {
@@ -41,60 +58,49 @@ const MainPageVideos = () => {
     loadNews();
   }, []);
 
-  // Keyboard navigation
+  // Navegación con teclas
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key === 'ArrowUp' && idx > 0) {
+      if ((e.key === 'ArrowUp' || e.key === 'ArrowLeft') && idx > 0) {
         setIdx(prev => prev - 1);
       }
-      if (e.key === 'ArrowDown' && idx < news.length - 1) {
-        setIdx(prev => prev + 1);
-      }
-      if (e.key === 'ArrowLeft' && idx > 0) {
-        setIdx(prev => prev - 1);
-      }
-      if (e.key === 'ArrowRight' && idx < news.length - 1) {
+      if ((e.key === 'ArrowDown' || e.key === 'ArrowRight') && idx < orderedNews.length - 1) {
         setIdx(prev => prev + 1);
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [idx, news.length]);
+  }, [idx, orderedNews.length]);
 
   const parseTitleFromSummary = (longSummary) => {
     const titleMatch = longSummary.match(/^Título:\s*(.+?)(?:\n|$)/i);
     if (titleMatch) return titleMatch[1].trim();
-    const titleMatchAngle = longSummary.match(/^<Título>:\s*(.+?)(?:\n|$)/i);
-    if (titleMatchAngle) return titleMatchAngle[1].trim();
-    const titleMatchAster = longSummary.match(/\*\*Título:\*\*\s*(.+?)(?:\n|$)/i);
-    if (titleMatchAster) return titleMatchAster[1].trim();
+    const angle = longSummary.match(/^<Título>:\s*(.+?)(?:\n|$)/i);
+    if (angle) return angle[1].trim();
+    const aster = longSummary.match(/\*\*Título:\*\*\s*(.+?)(?:\n|$)/i);
+    if (aster) return aster[1].trim();
     return longSummary.substring(0, 100) + '...';
   };
 
   const parseLeadFromSummary = (longSummary) => {
     const leadMatch = longSummary.match(/Entradilla:\s*(.+?)(?:\n\n|\n(?=[A-Z])|$)/s);
     if (leadMatch) return leadMatch[1].trim();
-    
-    const leadMatchAngle = longSummary.match(/<Entradilla>:\s*(.+?)(?:\n\n|\n(?=[A-Z])|$)/s);
-    if (leadMatchAngle) return leadMatchAngle[1].trim();
-    
-    const leadMatchAster = longSummary.match(/\*\*Entradilla:\*\*\s*(.+?)(?:\n\n|\*\*|$)/s);
-    if (leadMatchAster) return leadMatchAster[1].trim();
-    
+    const angle = longSummary.match(/<Entradilla>:\s*(.+?)(?:\n\n|\n(?=[A-Z])|$)/s);
+    if (angle) return angle[1].trim();
+    const aster = longSummary.match(/\*\*Entradilla:\*\*\s*(.+?)(?:\n\n|\*\*|$)/s);
+    if (aster) return aster[1].trim();
     return '';
   };
 
   if (loading) return <LoadingSpinner message="Cargando videos..." />;
 
-  const current = news[idx] || {};
+  // Noticia actual en orden intercalado
+  const current = orderedNews[idx] || {};
   const currentVideo = videosMap[String(current.group_id)];
 
   return (
-    <div 
-      className="video-section"
-      ref={videoSectionRef}
-    >
+    <div className="video-section" ref={videoSectionRef}>
       {/* Mobile Navigation - Top */}
       <div className="mobile-nav-top">
         <button
@@ -162,8 +168,8 @@ const MainPageVideos = () => {
       <div className="desktop-nav-right">
         <button
           className="desktop-nav-btn"
-          onClick={() => setIdx(i => Math.min(i + 1, news.length - 1))}
-          disabled={idx === news.length - 1}
+          onClick={() => setIdx(i => Math.min(i + 1, orderedNews.length - 1))}
+          disabled={idx === orderedNews.length - 1}
         >
           Siguiente
         </button>
@@ -173,8 +179,8 @@ const MainPageVideos = () => {
       <div className="mobile-nav-bottom">
         <button
           className="mobile-nav-btn"
-          onClick={() => setIdx(i => Math.min(i + 1, news.length - 1))}
-          disabled={idx === news.length - 1}
+          onClick={() => setIdx(i => Math.min(i + 1, orderedNews.length - 1))}
+          disabled={idx === orderedNews.length - 1}
         >
           Siguiente
         </button>
