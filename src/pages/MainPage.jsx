@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getImagenesPrincipales, getResumenes } from '../api/apiFunctions';
 import LoadingSpinner from '../components/LoadingSpinner/LoadingSpinner';
@@ -22,6 +22,27 @@ const MainPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const sliderRef = useRef(null);
 
+  // Función para intercalar: primero, último, segundo, penúltimo...
+  const interleave = (arr) => {
+    const result = [];
+    let left = 0;
+    let right = arr.length - 1;
+    while (left <= right) {
+      if (left === right) {
+        result.push(arr[left]);
+      } else {
+        result.push(arr[left]);
+        result.push(arr[right]);
+      }
+      left++;
+      right--;
+    }
+    return result;
+  };
+
+  // Ordenar filtrados intercalados
+  const orderedNews = useMemo(() => interleave(filteredNews), [filteredNews]);
+
   // Check if any filters are active
   const isFiltering = searchTerm.trim() !== '' || selectedCategory !== '';
 
@@ -30,15 +51,13 @@ const MainPage = () => {
       try {
         const [resumenes, imagenesPrincipales] = await Promise.all([
           getResumenes(),
-          getImagenesPrincipales()
+          getImagenesPrincipales(),
         ]);
 
         const imageMap = {};
         imagenesPrincipales.forEach(img => {
           const match = img.key.match(/group_(\d+)_/);
-          if (match) {
-            imageMap[match[1]] = img.url;
-          }
+          if (match) imageMap[match[1]] = img.url;
         });
 
         setNews(resumenes);
@@ -56,30 +75,20 @@ const MainPage = () => {
   // Filter news based on search term and category
   useEffect(() => {
     let filtered = news;
-
-    // Filter by search term
     if (searchTerm.trim()) {
       filtered = filtered.filter(item => {
         const title = parseTitleFromSummary(item.long_summary);
         return title.toLowerCase().includes(searchTerm.toLowerCase());
       });
     }
-
-    // Filter by category
     if (selectedCategory) {
       filtered = filtered.filter(item => item.category === selectedCategory);
     }
-
     setFilteredNews(filtered);
   }, [news, searchTerm, selectedCategory]);
 
-  const handleSearchChange = (term) => {
-    setSearchTerm(term);
-  };
-
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-  };
+  const handleSearchChange = (term) => setSearchTerm(term);
+  const handleCategoryChange = (category) => setSelectedCategory(category);
 
   const scrollBy = (distance) => {
     if (sliderRef.current) {
@@ -90,48 +99,21 @@ const MainPage = () => {
   const parseTitleFromSummary = (longSummary) => {
     const titleMatch = longSummary.match(/^Título:\s*(.+?)(?:\n|$)/i);
     if (titleMatch) return titleMatch[1].trim();
-    const titleMatchAngle = longSummary.match(/^<Título>:\s*(.+?)(?:\n|$)/i);
-    if (titleMatchAngle) return titleMatchAngle[1].trim();
-    const titleMatchAster = longSummary.match(/\*\*Título:\*\*\s*(.+?)(?:\n|$)/i);
-    if (titleMatchAster) return titleMatchAster[1].trim();
     return longSummary.substring(0, 100) + '...';
   };
 
   const parseLeadFromSummary = (longSummary) => {
-    // Buscar diferentes patrones de entradilla
-    const leadMatch1 = longSummary.match(/\*\*Entradilla:\*\*\s*(.+?)(?:\n\n|\*\*|$)/s);
-    if (leadMatch1) return leadMatch1[1].trim().substring(0, 200) + '...';
-    
-    const leadMatch2 = longSummary.match(/Entradilla:\s*(.+?)(?:\n\n|\*\*|$)/s);
-    if (leadMatch2) return leadMatch2[1].trim().substring(0, 200) + '...';
-    
-    const leadMatch3 = longSummary.match(/<Entradilla>:\s*(.+?)(?:\n\n|\*\*|$)/s);
-    if (leadMatch3) return leadMatch3[1].trim().substring(0, 200) + '...';
-    
-    // Si no encuentra entradilla específica, usar el texto después del título
-    const afterTitle = longSummary.replace(/^(Título:|<Título>:|\*\*Título:\*\*)\s*(.+?)(?:\n|$)/i, '').trim();
-    if (afterTitle) {
-      // Tomar las primeras líneas después del título
-      const lines = afterTitle.split('\n').filter(line => line.trim() !== '');
-      if (lines.length > 0) {
-        return lines[0].substring(0, 200) + '...';
-      }
-    }
-    
-    // Fallback: usar short_summary si existe
+    const leadMatch = longSummary.match(/Entradilla:\s*(.+?)(?:\n\n|$)/s);
+    if (leadMatch) return leadMatch[1].trim().substring(0, 200) + '...';
     return longSummary.substring(0, 200) + '...';
   };
 
-  const getImageByGroupId = (id) => {
-    return imagesMap[String(id)] || '/assets/images/placeholder.jpg';
-  };
+  const getImageByGroupId = (id) => imagesMap[String(id)] || '/assets/images/placeholder.jpg';
 
   if (loading) return <LoadingSpinner message="Cargando noticias..." />;
 
   return (
     <>
-      
-      {/* Filters Component */}
       <NewsFilters
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
@@ -139,47 +121,38 @@ const MainPage = () => {
         onCategoryChange={handleCategoryChange}
       />
 
-      {/* Show results when filtering */}
-      {isFiltering && (
+      {isFiltering ? (
         <>
-          {/* Results count */}
           <div className="results-info">
             <p>
-              {filteredNews.length} resultado{filteredNews.length !== 1 ? 's' : ''} encontrado{filteredNews.length !== 1 ? 's' : ''}
+              {filteredNews.length} resultado{filteredNews.length !== 1 && 's'} encontrado{filteredNews.length !== 1 && 's'}
               {searchTerm && ` para "${searchTerm}"`}
               {selectedCategory && ` en ${selectedCategory}`}
             </p>
           </div>
-
           {filteredNews.length > 0 ? (
-            /* List View for filtered results */
             <div className="news-list">
-              {filteredNews.map(item => (
-                <Link 
-                  key={item.group_id} 
-                  to={`/grupo/${item.group_id}`} 
+              {orderedNews.map(item => (
+                <Link
+                  key={item.group_id}
+                  to={`/grupo/${item.group_id}`}
                   className="news-list-item"
                 >
-                  <img 
+                  <img
                     src={getImageByGroupId(item.group_id)}
                     alt={parseTitleFromSummary(item.long_summary)}
                     className="news-list-image"
-                    onError={(e) => { e.target.src = '/assets/images/placeholder.jpg'; }}
+                    onError={e => { e.target.src = '/assets/images/placeholder.jpg'; }}
                   />
                   <div className="news-list-content">
                     <span className="news-list-category">{item.category}</span>
-                    <h3 className="news-list-title">
-                      {parseTitleFromSummary(item.long_summary)}
-                    </h3>
-                    <p className="news-list-lead">
-                      {parseLeadFromSummary(item.long_summary)}
-                    </p>
+                    <h3 className="news-list-title">{parseTitleFromSummary(item.long_summary)}</h3>
+                    <p className="news-list-lead">{parseLeadFromSummary(item.long_summary)}</p>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            /* No results message */
             <div className="no-results">
               <div className="no-results-icon">🔍</div>
               <h3>No se encontraron noticias</h3>
@@ -192,26 +165,16 @@ const MainPage = () => {
                   <li>Seleccionar "Todas" las categorías</li>
                 </ul>
               </div>
-              <button 
-                className="clear-filters-btn"
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory('');
-                }}
-              >
+              <button className="clear-filters-btn" onClick={() => { setSearchTerm(''); setSelectedCategory(''); }}>
                 Limpiar filtros
               </button>
             </div>
           )}
         </>
-      )}
-
-      {/* Show default layout only when NOT filtering */}
-      {!isFiltering && (
+      ) : (
         <>
-          {/* Main Grid */}
           <div className="grid-container">
-            {filteredNews.slice(0, 5).map((item, i) => (
+            {orderedNews.slice(0, 5).map((item, i) => (
               <Link
                 key={item.group_id}
                 to={`/grupo/${item.group_id}`}
@@ -230,20 +193,13 @@ const MainPage = () => {
             ))}
           </div>
 
-          {/* More News Slider */}
-          {filteredNews.length > 5 && (
+          {orderedNews.length > 5 && (
             <>
               <h2 className="slider-title">Más notícias</h2>
               <div className="slider-container">
-                <button
-                  className="slider-button left"
-                  onClick={() => scrollBy(-600)}
-                  aria-label="Scroll left"
-                >
-                  &lt;
-                </button>
+                <button className="slider-button left" onClick={() => scrollBy(-600)} aria-label="Scroll left">&lt;</button>
                 <div className="more-news-row" ref={sliderRef}>
-                  {filteredNews.slice(5).map(item => (
+                  {orderedNews.slice(5).map(item => (
                     <Link
                       key={item.group_id}
                       to={`/grupo/${item.group_id}`}
@@ -252,7 +208,7 @@ const MainPage = () => {
                       <img
                         src={getImageByGroupId(item.group_id)}
                         alt={parseTitleFromSummary(item.long_summary)}
-                        onError={(e) => { e.target.src = '/assets/images/placeholder.jpg'; }}
+                        onError={e => { e.target.src = '/assets/images/placeholder.jpg'; }}
                       />
                       <div className="more-news-content">
                         <span className="category-tag small">{item.category}</span>
@@ -261,13 +217,7 @@ const MainPage = () => {
                     </Link>
                   ))}
                 </div>
-                <button
-                  className="slider-button right"
-                  onClick={() => scrollBy(600)}
-                  aria-label="Scroll right"
-                >
-                  &gt;
-                </button>
+                <button className="slider-button right" onClick={() => scrollBy(600)} aria-label="Scroll right">&gt;</button>
               </div>
             </>
           )}
