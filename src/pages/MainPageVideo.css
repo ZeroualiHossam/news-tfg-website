@@ -226,7 +226,7 @@ body {
 
 .mobile-nav-btn {
   padding: 12px 24px;
-  background: #F97A00;
+  background: #282c34;
   border: none;
   color: #fff;
   font-size: 0.9rem;
@@ -238,9 +238,8 @@ body {
 }
 
 .mobile-nav-btn:hover:not(:disabled) {
-  background: #F97A00;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  background: #1a1d22;
+  transform: translateY(-2px);
 }
 
 .mobile-nav-btn:disabled {
